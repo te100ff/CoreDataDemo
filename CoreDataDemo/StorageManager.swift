@@ -11,7 +11,6 @@ import CoreData
 class StorageManager {
     static let shared = StorageManager()
     
-    private lazy var context = persistentContainer.viewContext
     
     // MARK: - Core Data stack
     lazy var persistentContainer: NSPersistentContainer = {
@@ -23,6 +22,8 @@ class StorageManager {
         })
         return container
     }()
+    
+    private lazy var context = persistentContainer.viewContext
     
     // MARK: - Core Data Saving support
     func saveContext() {
@@ -50,7 +51,7 @@ class StorageManager {
     }
     
     func createTaskObject() -> Task? {
-        guard let entityDescription = NSEntityDescription.entity(forEntityName: "Task", in: context) else { return nil  }
+        guard let entityDescription = NSEntityDescription.entity(forEntityName: "Task", in: context) else { return nil }
         guard let task = NSManagedObject(entity: entityDescription, insertInto: context) as? Task else { return nil }
         return task
     }

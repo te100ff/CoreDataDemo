@@ -120,7 +120,7 @@ extension TaskListViewController {
     
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
-            task = taskList[indexPath.row]
+            //task = taskList[indexPath.row]
             cellIndexPath = indexPath.row
             guard let index = cellIndexPath else { return }
             let cellIndex = IndexPath(row: index, section: 0)
@@ -129,6 +129,11 @@ extension TaskListViewController {
         }
         StorageManager.shared.saveContext()
     }
+    
+//    override func tableView(_ tableView: UITableView, didEndEditingRowAt indexPath: IndexPath?) {
+//
+//        StorageManager.shared.saveContext()
+//    }
 }
 
 
