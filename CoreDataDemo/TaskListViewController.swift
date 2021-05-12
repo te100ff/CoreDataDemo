@@ -53,13 +53,18 @@ class TaskListViewController: UITableViewController {
     }
     
     @objc private func addNewTask() {
-        showAlert(with: "New Task", and: "What do you want to do?")
+        showAlert(with: "New Task", and: "What do you want to do?", placeholder: "New task", text: nil)
         task = StorageManager.shared.createTaskObject()
     }
     
     
     
-    private func showAlert(with title: String, and message: String) {
+    private func showAlert(
+        with title: String,
+        and message: String,
+        placeholder: String?,
+        text: String?
+        ) {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
         let saveAction = UIAlertAction(title: "Save", style: .default) { _ in
             guard let task = alert.textFields?.first?.text, !task.isEmpty else { return }
@@ -69,7 +74,8 @@ class TaskListViewController: UITableViewController {
         alert.addAction(saveAction)
         alert.addAction(cancelAction)
         alert.addTextField { textField in
-            textField.placeholder = "New Task"
+            textField.placeholder = placeholder
+            textField.text = text
         }
         present(alert, animated: true)
     }
@@ -114,7 +120,7 @@ extension TaskListViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         task = taskList[indexPath.row]
         cellIndexPath = indexPath.row
-        showAlert(with: "Edit task", and: "Make changes")
+        showAlert(with: "Edit task", and: "Make changes", placeholder: nil, text: task?.title)
     }
     
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
