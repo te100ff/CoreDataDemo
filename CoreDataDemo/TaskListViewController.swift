@@ -8,9 +8,7 @@
 import UIKit
 
 
-//protocol TaskViewControllereDelegate {
-//    func reloadData()
-//}
+
 
 class TaskListViewController: UITableViewController {
     
@@ -18,7 +16,7 @@ class TaskListViewController: UITableViewController {
     private let cellID = "cell"
     private var taskList: [Task] = []
     private var task: Task?
-    private var cellIndex: Int?
+    private var cellIndexPath: Int?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -85,7 +83,7 @@ class TaskListViewController: UITableViewController {
         
         if title != nil {
             task.title = taskName
-            guard let index = cellIndex else { return }
+            guard let index = cellIndexPath else { return }
             let cellIndex = IndexPath(row: index, section: 0)
             tableView.reloadRows(at: [cellIndex], with: .automatic)
         } else {
@@ -98,35 +96,39 @@ class TaskListViewController: UITableViewController {
     }
     
 }
-    
-    // MARK: - UITableViewDataSource
-    extension TaskListViewController {
-        override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-            taskList.count
-        }
-        
-        override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-            let cell = tableView.dequeueReusableCell(withIdentifier: cellID, for: indexPath)
-            let task = taskList[indexPath.row]
-            var content = cell.defaultContentConfiguration()
-            content.text = task.title
-            cell.contentConfiguration = content
-            return cell
-        }
-        
-        override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-            task = taskList[indexPath.row]
-            cellIndex = indexPath.row
-            showAlert(with: "Edit task", and: "Make changes")
-        }
-    }
 
-//// MARK: - TaskViewControllereDelegate
-//extension TaskListViewController: TaskViewControllereDelegate {
-//    func reloadData() {
-//        StorageManager.shared.fetchData { taskList in
-//            self.taskList = taskList
-//        }
-//        tableView.reloadData()
-//    }
-//}
+// MARK: - UITableViewDataSource
+extension TaskListViewController {
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        taskList.count
+    }
+    
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: cellID, for: indexPath)
+        let task = taskList[indexPath.row]
+        var content = cell.defaultContentConfiguration()
+        content.text = task.title
+        cell.contentConfiguration = content
+        return cell
+    }
+    
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        task = taskList[indexPath.row]
+        cellIndexPath = indexPath.row
+        showAlert(with: "Edit task", and: "Make changes")
+    }
+    
+    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        if editingStyle == .delete {
+            task = taskList[indexPath.row]
+            cellIndexPath = indexPath.row
+            guard let index = cellIndexPath else { return }
+            let cellIndex = IndexPath(row: index, section: 0)
+            taskList.remove(at: index)
+            tableView.deleteRows(at: [cellIndex], with: .automatic)
+        }
+        StorageManager.shared.saveContext()
+    }
+}
+
+
