@@ -17,6 +17,7 @@ class TaskListViewController: UITableViewController {
     
     private let cellID = "cell"
     private var taskList: [Task] = []
+    private var task: Task?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -57,6 +58,9 @@ class TaskListViewController: UITableViewController {
     
     @objc private func addNewTask() {
         showAlert(with: "New Task", and: "What do you want to do?")
+        StorageManager.shared.createTaskObject(completion: { task in
+            self.task = task
+        })
     }
     
     
@@ -77,13 +81,14 @@ class TaskListViewController: UITableViewController {
     }
     
     private func save(_ taskName: String) {
-        guard let task = StorageManager.shared.createTaskObject() else { return }
+       // guard let task = StorageManager.shared.createTaskObject() else { return }
+        guard let task = task else { return }
         task.title = taskName
-        taskList.append(task)
+       // taskList.append(task)
         
         let cellIndex = IndexPath(row: taskList.count - 1, section: 0)
-        tableView.insertRows(at: [cellIndex], with: .automatic)
-        
+        //tableView.insertRows(at: [cellIndex], with: .automatic)
+        tableView.reloadRows(at: [cellIndex], with: .automatic)
         StorageManager.shared.saveContext()
     }
 }
@@ -104,10 +109,8 @@ extension TaskListViewController {
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let task = taskList[indexPath.row]
+        task = taskList[indexPath.row]
         showAlert(with: "Edit task", and: "Make changes")
-        
-        
     }
 }
 
