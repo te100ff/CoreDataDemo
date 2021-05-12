@@ -18,7 +18,8 @@ class TaskListViewController: UITableViewController {
     private let cellID = "cell"
     private var taskList: [Task] = []
     private var task: Task?
-
+    private var cellIndex: Int?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
@@ -26,7 +27,7 @@ class TaskListViewController: UITableViewController {
         setupNavigationBar()
         taskList = StorageManager.shared.fetchData()
     }
-
+    
     private func setupNavigationBar() {
         title = "Task List"
         navigationController?.navigationBar.prefersLargeTitles = true
@@ -58,9 +59,7 @@ class TaskListViewController: UITableViewController {
     
     @objc private func addNewTask() {
         showAlert(with: "New Task", and: "What do you want to do?")
-        StorageManager.shared.createTaskObject(completion: { task in
-            self.task = task
-        })
+        task = StorageManager.shared.createTaskObject()
     }
     
     
@@ -81,38 +80,46 @@ class TaskListViewController: UITableViewController {
     }
     
     private func save(_ taskName: String) {
-       // guard let task = StorageManager.shared.createTaskObject() else { return }
         guard let task = task else { return }
-        task.title = taskName
-       // taskList.append(task)
+        let title = task.title
         
-        let cellIndex = IndexPath(row: taskList.count - 1, section: 0)
-        //tableView.insertRows(at: [cellIndex], with: .automatic)
-        tableView.reloadRows(at: [cellIndex], with: .automatic)
+        if title != nil {
+            task.title = taskName
+            guard let index = cellIndex else { return }
+            let cellIndex = IndexPath(row: index, section: 0)
+            tableView.reloadRows(at: [cellIndex], with: .automatic)
+        } else {
+            task.title = taskName
+            taskList.append(task)
+            let cellIndex = IndexPath(row: taskList.count - 1, section: 0)
+            tableView.insertRows(at: [cellIndex], with: .automatic)
+        }
         StorageManager.shared.saveContext()
     }
-}
-
-// MARK: - UITableViewDataSource
-extension TaskListViewController {
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        taskList.count
-    }
     
-    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: cellID, for: indexPath)
-        let task = taskList[indexPath.row]
-        var content = cell.defaultContentConfiguration()
-        content.text = task.title
-        cell.contentConfiguration = content
-        return cell
-    }
-    
-    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        task = taskList[indexPath.row]
-        showAlert(with: "Edit task", and: "Make changes")
-    }
 }
+    
+    // MARK: - UITableViewDataSource
+    extension TaskListViewController {
+        override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+            taskList.count
+        }
+        
+        override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+            let cell = tableView.dequeueReusableCell(withIdentifier: cellID, for: indexPath)
+            let task = taskList[indexPath.row]
+            var content = cell.defaultContentConfiguration()
+            content.text = task.title
+            cell.contentConfiguration = content
+            return cell
+        }
+        
+        override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+            task = taskList[indexPath.row]
+            cellIndex = indexPath.row
+            showAlert(with: "Edit task", and: "Make changes")
+        }
+    }
 
 //// MARK: - TaskViewControllereDelegate
 //extension TaskListViewController: TaskViewControllereDelegate {

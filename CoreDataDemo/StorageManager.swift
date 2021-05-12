@@ -49,10 +49,10 @@ class StorageManager {
         
     }
     
-    func createTaskObject(completion: (Task) -> Void) {
-        guard let entityDescription = NSEntityDescription.entity(forEntityName: "Task", in: context) else { return  }
-        guard let task = NSManagedObject(entity: entityDescription, insertInto: context) as? Task else { return }
-        completion(task)
+    func createTaskObject() -> Task? {
+        guard let entityDescription = NSEntityDescription.entity(forEntityName: "Task", in: context) else { return nil  }
+        guard let task = NSManagedObject(entity: entityDescription, insertInto: context) as? Task else { return nil }
+        return task
     }
     
     
