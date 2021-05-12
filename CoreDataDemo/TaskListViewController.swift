@@ -7,9 +7,6 @@
 
 import UIKit
 
-
-
-
 class TaskListViewController: UITableViewController {
     
     
@@ -106,9 +103,11 @@ extension TaskListViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: cellID, for: indexPath)
         let task = taskList[indexPath.row]
+        
         var content = cell.defaultContentConfiguration()
         content.text = task.title
         cell.contentConfiguration = content
+        
         return cell
     }
     
@@ -120,20 +119,15 @@ extension TaskListViewController {
     
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
-            //task = taskList[indexPath.row]
-            cellIndexPath = indexPath.row
-            guard let index = cellIndexPath else { return }
-            let cellIndex = IndexPath(row: index, section: 0)
-            taskList.remove(at: index)
+            StorageManager.shared.deleteTaskObject(taskList[indexPath.row])
+            
+            taskList.remove(at: indexPath.row)
+            let cellIndex = IndexPath(row: indexPath.row, section: 0)
             tableView.deleteRows(at: [cellIndex], with: .automatic)
         }
-        StorageManager.shared.saveContext()
     }
     
-//    override func tableView(_ tableView: UITableView, didEndEditingRowAt indexPath: IndexPath?) {
-//
-//        StorageManager.shared.saveContext()
-//    }
+
 }
 
 
