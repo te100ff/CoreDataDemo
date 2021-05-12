@@ -36,15 +36,17 @@ class StorageManager {
         }
     }
     
-    func fetchData(completion: ([Task]) -> Void) {
+    func fetchData() -> [Task] {
         let fetchRequest: NSFetchRequest<Task> = Task.fetchRequest()
         
         do {
             let taskList = try context.fetch(fetchRequest)
-            completion(taskList)
+            return taskList
         } catch let error {
             print(error)
+            return []
         }
+        
     }
     
     func createTaskObject() -> Task? {
