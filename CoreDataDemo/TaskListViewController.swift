@@ -6,15 +6,15 @@
 //
 
 import UIKit
-import CoreData
 
-protocol TaskViewControllereDelegate {
-    func reloadData()
-}
+
+//protocol TaskViewControllereDelegate {
+//    func reloadData()
+//}
 
 class TaskListViewController: UITableViewController {
     
-    private let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    
     private let cellID = "cell"
     private var taskList: [Task] = []
 
@@ -23,7 +23,9 @@ class TaskListViewController: UITableViewController {
         view.backgroundColor = .white
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: cellID)
         setupNavigationBar()
-        fetchData()
+        StorageManager.shared.fetchData { taskList in
+            self.taskList = taskList
+        }
     }
 
     private func setupNavigationBar() {
@@ -59,15 +61,7 @@ class TaskListViewController: UITableViewController {
         showAlert(with: "New Task", and: "What do you want to do?")
     }
     
-    private func fetchData() {
-        let fetchRequest: NSFetchRequest<Task> = Task.fetchRequest()
-        
-        do {
-            taskList = try context.fetch(fetchRequest)
-        } catch let error {
-            print(error)
-        }
-    }
+    
     
     private func showAlert(with title: String, and message: String) {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
@@ -85,21 +79,14 @@ class TaskListViewController: UITableViewController {
     }
     
     private func save(_ taskName: String) {
-        guard let entityDescription = NSEntityDescription.entity(forEntityName: "Task", in: context) else { return }
-        guard let task = NSManagedObject(entity: entityDescription, insertInto: context) as? Task else { return }
+        guard let task = StorageManager.shared.createTaskObject() else { return }
         task.title = taskName
         taskList.append(task)
         
         let cellIndex = IndexPath(row: taskList.count - 1, section: 0)
         tableView.insertRows(at: [cellIndex], with: .automatic)
         
-        if context.hasChanges {
-            do {
-                try context.save()
-            } catch let error {
-                print(error.localizedDescription)
-            }
-        }
+        StorageManager.shared.saveContext()
     }
 }
 
@@ -117,12 +104,21 @@ extension TaskListViewController {
         cell.contentConfiguration = content
         return cell
     }
-}
-
-// MARK: - TaskViewControllereDelegate
-extension TaskListViewController: TaskViewControllereDelegate {
-    func reloadData() {
-        fetchData()
-        tableView.reloadData()
+    
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let task = taskList[indexPath.row]
+        showAlert(with: "Edit task", and: "Make changes")
+        
+        
     }
 }
+
+//// MARK: - TaskViewControllereDelegate
+//extension TaskListViewController: TaskViewControllereDelegate {
+//    func reloadData() {
+//        StorageManager.shared.fetchData { taskList in
+//            self.taskList = taskList
+//        }
+//        tableView.reloadData()
+//    }
+//}
