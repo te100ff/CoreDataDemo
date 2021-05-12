@@ -8,8 +8,7 @@
 import UIKit
 
 class TaskListViewController: UITableViewController {
-    
-    
+    // MARK: - Private properties
     private let cellID = "cell"
     private var taskList: [Task] = []
     private var task: Task?
@@ -23,6 +22,7 @@ class TaskListViewController: UITableViewController {
         taskList = StorageManager.shared.fetchData()
     }
     
+    // MARK: - Private methods
     private func setupNavigationBar() {
         title = "Task List"
         navigationController?.navigationBar.prefersLargeTitles = true
@@ -53,10 +53,14 @@ class TaskListViewController: UITableViewController {
     }
     
     @objc private func addNewTask() {
-        showAlert(with: "New Task", and: "What do you want to do?", placeholder: "New task", text: nil)
+        showAlert(
+            with: "New Task",
+            and: "What do you want to do?",
+            placeholder: "New task",
+            text: nil
+        )
         task = StorageManager.shared.createTaskObject()
     }
-    
     
     
     private func showAlert(
@@ -120,7 +124,12 @@ extension TaskListViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         task = taskList[indexPath.row]
         cellIndexPath = indexPath.row
-        showAlert(with: "Edit task", and: "Make changes", placeholder: nil, text: task?.title)
+        showAlert(
+            with: "Edit task",
+            and: "Make changes",
+            placeholder: nil,
+            text: task?.title
+        )
     }
     
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
