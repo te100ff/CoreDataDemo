@@ -5,7 +5,6 @@
 //  Created by Stanislav Testov on 12.05.2021.
 //
 
-import UIKit
 import CoreData
 
 class StorageManager {
@@ -13,7 +12,7 @@ class StorageManager {
     
     
     // MARK: - Core Data stack
-    private lazy var persistentContainer: NSPersistentContainer = {
+    private let persistentContainer: NSPersistentContainer = {
         let container = NSPersistentContainer(name: "CoreDataDemo")
         container.loadPersistentStores(completionHandler: { (storeDescription, error) in
             if let error = error as NSError? {
@@ -23,7 +22,11 @@ class StorageManager {
         return container
     }()
     
-    private lazy var context = persistentContainer.viewContext
+    private let context: NSManagedObjectContext
+    
+    private init() {
+        context = persistentContainer.viewContext
+    }
     
     // MARK: - Core Data Saving support
     func saveContext() {
@@ -50,22 +53,24 @@ class StorageManager {
         
     }
     
-    func createTaskObject() -> Task? {
+    func createAndSaveTaskObject(_ taskname: String) -> Task? {
         guard let entityDescription = NSEntityDescription.entity(forEntityName: "Task", in: context) else { return nil }
         guard let task = NSManagedObject(entity: entityDescription, insertInto: context) as? Task else { return nil }
+        task.title = taskname
+        saveContext()
         return task
+    }
+    
+    func edit(_ task: Task, newTitle: String) {
+        task.title = newTitle
+        saveContext()
     }
     
     func deleteTaskObject(_ task: Task) {
         context.delete(task)
-        do {
-            try context.save()
-        } catch {
-            let nserror = error as NSError
-            fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
-        }
+        saveContext()
     }
   
-    private init() {}
+   
     
 }
