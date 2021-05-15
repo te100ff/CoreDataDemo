@@ -10,16 +10,16 @@ import UIKit
 class TaskListViewController: UITableViewController {
     // MARK: - Private properties
     private let cellID = "cell"
-    private var taskList: [Task] = []
-    private var task: Task?
-    private var cellIndexPath: Int?
+    private var taskList = StorageManager.shared.fetchData()
+    //private var task: Task?
+    //private var cellIndexPath: Int?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: cellID)
         setupNavigationBar()
-        taskList = StorageManager.shared.fetchData()
+        
     }
     
     // MARK: - Private methods
@@ -59,20 +59,23 @@ class TaskListViewController: UITableViewController {
             placeholder: "New task",
             text: nil
         )
-        task = StorageManager.shared.createTaskObject()
+        //task = StorageManager.shared.createTaskObject()
     }
     
     
     private func showAlert(
+        task: Task? = nil,
         with title: String,
         and message: String,
         placeholder: String?,
-        text: String?
+        text: String?,
+        completion: (() -> Void)? = nil
         ) {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
         let saveAction = UIAlertAction(title: "Save", style: .default) { _ in
-            guard let task = alert.textFields?.first?.text, !task.isEmpty else { return }
-            self.save(task)
+            guard let title = alert.textFields?.first?.text, !title.isEmpty else { return }
+            self.save(title, task: task, completion: completion)
+            
         }
         let cancelAction = UIAlertAction(title: "Cancel", style: .destructive)
         alert.addAction(saveAction)
@@ -84,22 +87,24 @@ class TaskListViewController: UITableViewController {
         present(alert, animated: true)
     }
     
-    private func save(_ taskName: String) {
-        guard let task = task else { return }
-        let title = task.title
+    private func save(_ taskName: String, task: Task?, completion: (() -> Void)? = nil) {
+        //guard let task = Task.self else { return }
+        //let title = task.title
         
-        if title != nil {
-            task.title = taskName
-            guard let index = cellIndexPath else { return }
-            let cellIndex = IndexPath(row: index, section: 0)
-            tableView.reloadRows(at: [cellIndex], with: .automatic)
+        if let task = task, let completion = completion {
+            StorageManager.shared.edit(task, newTitle: taskName)
+//            let cellIndex = IndexPath(row: index, section: 0)
+//            let x = tableView.indexPathForSelectedRow!
+//            tableView.reloadRows(at: [tableView.indexPathForSelectedRow], with: .automatic)
+            completion()
         } else {
-            task.title = taskName
+            let newTask = StorageManager.shared.createAndSaveTaskObject(taskName)
+            guard let task = newTask else { return }
             taskList.append(task)
             let cellIndex = IndexPath(row: taskList.count - 1, section: 0)
             tableView.insertRows(at: [cellIndex], with: .automatic)
         }
-        StorageManager.shared.saveContext()
+        
     }
     
 }
@@ -122,14 +127,17 @@ extension TaskListViewController {
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        task = taskList[indexPath.row]
-        cellIndexPath = indexPath.row
+        tableView.deselectRow(at: indexPath, animated: true)
+        let task = taskList[indexPath.row]
         showAlert(
+            task: task,
             with: "Edit task",
             and: "Make changes",
             placeholder: nil,
-            text: task?.title
-        )
+            text: task.title) {
+            tableView.reloadRows(at: [indexPath], with: .automatic)
+        }
+        
     
     }
     
