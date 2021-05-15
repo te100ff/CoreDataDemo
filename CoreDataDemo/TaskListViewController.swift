@@ -88,14 +88,9 @@ class TaskListViewController: UITableViewController {
     }
     
     private func save(_ taskName: String, task: Task?, completion: (() -> Void)? = nil) {
-        //guard let task = Task.self else { return }
-        //let title = task.title
         
         if let task = task, let completion = completion {
             StorageManager.shared.edit(task, newTitle: taskName)
-//            let cellIndex = IndexPath(row: index, section: 0)
-//            let x = tableView.indexPathForSelectedRow!
-//            tableView.reloadRows(at: [tableView.indexPathForSelectedRow], with: .automatic)
             completion()
         } else {
             let newTask = StorageManager.shared.createAndSaveTaskObject(taskName)
